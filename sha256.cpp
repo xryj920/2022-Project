@@ -1,31 +1,31 @@
 #include<iostream>
 using namespace std;
 typedef unsigned int UInt32;
-//Áù¸öÂß¼­º¯Êı
+//å…­ä¸ªé€»è¾‘å‡½æ•°
 #define Conditional(x,y,z) ((x&y)^((~x)&z))
 #define Majority(x,y,z) ((x&y)^(x&z)^(y&z))
 #define LSigma_0(x) (ROTL(x,30)^ROTL(x,19)^ROTL(x,10))
 #define LSigma_1(x) (ROTL(x,26)^ROTL(x,21)^ROTL(x,7))
 #define SSigma_0(x) (ROTL(x,25)^ROTL(x,14)^SHR(x,3))
 #define SSigma_1(x) (ROTL(x,15)^ROTL(x,13)^SHR(x,10))
-//ĞÅÏ¢ÕªÒª½á¹¹
+//ä¿¡æ¯æ‘˜è¦ç»“æ„
 struct Message_Digest {
     UInt32 H[8];
 };
-//SHA256Àà
+//SHA256ç±»
 class SHA256
 {
 public:
     SHA256() { INIT(); };
     ~SHA256() {};
-    Message_Digest DEAL(UInt32 W[16]);//´¦Àí512±ÈÌØÊı¾İ£¬·µ»ØĞÅÏ¢ÕªÒª
+    Message_Digest DEAL(UInt32 W[16]);//å¤„ç†512æ¯”ç‰¹æ•°æ®ï¼Œè¿”å›ä¿¡æ¯æ‘˜è¦
 private:
-    void INIT();                //³õÊ¼ÔÓ´ÕÖµ
-    UInt32 ROTR(UInt32 W, int n);//ÓÒĞı×ª
-    UInt32 ROTL(UInt32 W, int n);//×óĞı×ª
-    UInt32 SHR(UInt32 W, int n); //ÓÒÒÆÎ»
+    void INIT();                //åˆå§‹æ‚å‡‘å€¼
+    UInt32 ROTR(UInt32 W, int n);//å³æ—‹è½¬
+    UInt32 ROTL(UInt32 W, int n);//å·¦æ—‹è½¬
+    UInt32 SHR(UInt32 W, int n); //å³ç§»ä½
 private:
-    //ĞÅÏ¢ÕªÒª
+    //ä¿¡æ¯æ‘˜è¦
     Message_Digest MD;
 };
 const UInt32 K[64] = {
@@ -38,7 +38,7 @@ const UInt32 K[64] = {
         0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
         0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 };
-//³õÊ¼»¯ÔÓ´ÕÖµ£¨Ç°8¸öËØÊıµÄÆ½·½¸ùĞ¡ÊıÇ°32Î»£©
+//åˆå§‹åŒ–æ‚å‡‘å€¼ï¼ˆå‰8ä¸ªç´ æ•°çš„å¹³æ–¹æ ¹å°æ•°å‰32ä½ï¼‰
 void SHA256::INIT() {
     MD.H[0] = 0x6a09e667;
     MD.H[1] = 0xbb67ae85;
@@ -49,7 +49,7 @@ void SHA256::INIT() {
     MD.H[6] = 0x1f83d9ab;
     MD.H[7] = 0x5be0cd19;
 }
-//´¦Àí512±ÈÌØÊı¾İ£¬·µ»ØĞÅÏ¢ÕªÒª
+//å¤„ç†512æ¯”ç‰¹æ•°æ®ï¼Œè¿”å›ä¿¡æ¯æ‘˜è¦
 Message_Digest SHA256::DEAL(UInt32 M[16]) {
     int i;
     UInt32 T1 = 0, T2 = 0;
@@ -69,7 +69,7 @@ Message_Digest SHA256::DEAL(UInt32 M[16]) {
     F = MD.H[5];
     G = MD.H[6];
     H = MD.H[7];
-    cout << "³õÊ¼:";
+    cout << "åˆå§‹:";
     cout << hex << A << " " << B << " " << C << " " << D << " " << E << " " << F << " " << G << " " << H << endl;
     for (i = 0; i < 64; i++) {
         T1 = H + LSigma_1(E) + Conditional(E, F, G) + K[i] + W[i];
@@ -96,15 +96,15 @@ Message_Digest SHA256::DEAL(UInt32 M[16]) {
 
     return MD;
 }
-//ÓÒĞı×ª
+//å³æ—‹è½¬
 UInt32 SHA256::ROTR(UInt32 W, int n) {
     return ((W >> n) & 0xFFFFFFFF) | (W) << (32 - (n));
 }
-//×óĞı×ª
+//å·¦æ—‹è½¬
 UInt32 SHA256::ROTL(UInt32 W, int n) {
     return ((W << n) & 0xFFFFFFFF) | (W) >> (32 - (n));
 }
-//ÓÒÒÆÎ»
+//å³ç§»ä½
 UInt32 SHA256::SHR(UInt32 W, int n) {
     return ((W >> n) & 0xFFFFFFFF);
 }
@@ -112,51 +112,46 @@ UInt32 SHA256::SHR(UInt32 W, int n) {
 typedef unsigned int UInt32;
 typedef unsigned __int64 UInt64;
 typedef unsigned char UChar;
-#define Max 1000//×î´ó×Ö·ûÊı
+#define Max 1000//æœ€å¤§å­—ç¬¦æ•°
 SHA256 sha256 = SHA256();
 Message_Digest M_D;
-UInt32 W[Max / 4];//ÕûĞÍ
-UInt32 M[16];   //´æ·Ö×éĞÅÏ¢
-//Ñ¹Ëõ+ÏÔÊ¾
+UInt32 W[Max / 4];//æ•´å‹
+UInt32 M[16];   //å­˜åˆ†ç»„ä¿¡æ¯
+//å‹ç¼©+æ˜¾ç¤º
 void compress() {
     int i;
     M_D = sha256.DEAL(M);
-    cout << "¹şÏ£Öµ£º ";
+    cout << "å“ˆå¸Œå€¼ï¼š ";
     for (i = 0; i < 8; i++) {
         cout << hex << M_D.H[i] << " ";
     }
     cout << endl;
 }
-//Ìí¼ÓÌî³äÎ»+Ìí¼Ó³¤¶È
+//æ·»åŠ å¡«å……ä½+æ·»åŠ é•¿åº¦
 void PAD(UChar Y[Max]) {
     //x+1+d+l=|x|
     UInt32 i, j;
     UInt32 T1 = 0, T2 = 0, T3 = 0, T4 = 0;
     UChar temp[Max] = { 0 };
-    UInt64 x = strlen((char*)Y);//Êı¾İ³¤¶È
-    UInt32 d = abs(55 - long long int(x)) % 64;   //Ìî³ä³¤¶È
-    UInt32 n = (x + 8) / 64 + 1; //·Ö×éÊı
-    UInt32 m = x % 64;       //×îºó×éÊı¾İ³¤¶È
-    UInt32 l = 8;
-    cout << "Êı¾İ³¤¶Èx:" << int(x) << " ";
-    cout << "Ìî³ä³¤¶Èd:" << d << " ";
-    cout << "·Ö×éÊıÁ¿n:" << n << " ";
-    cout << "×îºó³¤¶Èm:" << m << endl;
-    //²»Ìî³ä
+    UInt64 x = strlen((char*)Y);//æ•°æ®é•¿åº¦
+    UInt32 d = abs(55 - long long int(x)) % 64;   //å¡«å……é•¿åº¦
+    UInt32 n = (x + 8) / 64 + 1; //åˆ†ç»„æ•°
+    UInt32 m = x % 64;       //æœ€åç»„æ•°æ®é•¿åº¦
+    //ä¸å¡«å……
     for (i = 0; i < x; i++) {
         temp[i] = Y[i];
     }
-    //Ìî³ä1´Î1000 0000
+    //å¡«å……1æ¬¡1000 0000
     temp[x] = 0x80;
-    //Ìî³äd´Î0000 0000
+    //å¡«å……dæ¬¡0000 0000
     for (i = x + 1; i < x + d + 1; i++) {
         temp[i] = 0x00;
     }
-    //Ìî³ä³¤¶ÈµÄ63-0Î»
+    //å¡«å……é•¿åº¦çš„63-0ä½
     for (i = 1; i <= l; i++) {
         temp[(n * 64) - i] = (UChar)(8 * x >> (i - 1) * 8);
     }
-    //ÎŞ·ûºÅ×Ö·û×ª»»ÎªÎŞ·ûºÅÕûĞÍ
+    //æ— ç¬¦å·å­—ç¬¦è½¬æ¢ä¸ºæ— ç¬¦å·æ•´å‹
     for (i = 0; i < Max / 4; i++) {
         for (j = 0; j < 4; j++) {
             if (j == 0)
@@ -170,25 +165,25 @@ void PAD(UChar Y[Max]) {
         }
         W[i] = (T1 << 24) + (T2 << 16) + (T3 << 8) + T4;
     }
-    //ÏÔÊ¾16½øÖÆÊı¾İ
-    cout << "16½øÖÆÊı¾İ£º";
+    //æ˜¾ç¤º16è¿›åˆ¶æ•°æ®
+    cout << "16è¿›åˆ¶æ•°æ®ï¼š";
     for (i = 0; i < n * 16; i++) {
         cout << hex << " " << W[i];
     }
     cout << endl;
-    //·Ö×é´¦Àí
+    //åˆ†ç»„å¤„ç†
     for (i = 0; i < n; i++) {
-        cout << "·Ö×é´¦Àí:" << i + 1 << endl;
+        cout << "åˆ†ç»„å¤„ç†:" << i + 1 << endl;
         for (j = 0; j < 16; j++) {
             M[j] = W[(i * 16) + j];
         }
-        compress();//sha-256Ñ¹Ëõ
+        compress();//sha-256å‹ç¼©
     }
 }
-//Ö÷º¯Êı
+//ä¸»å‡½æ•°
 int main() {
     UChar Y[Max];
-    cout << "ÇëÊäÈëÒª¼ÓÃÜµÄ×Ö·û´®£¨×î´ó" << Max << "¸ö£©£º" << endl;
+    cout << "è¯·è¾“å…¥è¦åŠ å¯†çš„å­—ç¬¦ä¸²ï¼ˆæœ€å¤§" << Max << "ä¸ªï¼‰ï¼š" << endl;
     cin >> Y;
     PAD(Y);
 
