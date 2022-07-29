@@ -166,9 +166,9 @@ void PAD(UChar Y[Max]) {
         W[i] = (T1 << 24) + (T2 << 16) + (T3 << 8) + T4;
     }
     //显示16进制数据
-    cout << "16进制数据：";
+    cout << "SHA256：";
     for (i = 0; i < n * 16; i++) {
-        cout << hex << " " << W[i];
+        cout << " " << W[i];
     }
     cout << endl;
     //分组处理
