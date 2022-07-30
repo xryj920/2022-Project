@@ -1,70 +1,14 @@
-#define SM3_HASH_SIZE 32 
-
-/*
-* SM3ÉÏÏÂÎÄ
-*/
-typedef struct SM3Context
-{
-	unsigned int intermediateHash[SM3_HASH_SIZE / 4];
-	unsigned char messageBlock[64];
-} SM3Context;
-
-/*
-* SM3¼ÆËãº¯Êı
-*/
-unsigned char* SM3Calc(const unsigned char* message,
-unsigned int messageLen, unsigned char digest[SM3_HASH_SIZE]);
-/*
-* sm3.c
-*/
 #include <stdio.h>
 #include <memory.h>
-
-/*
-* ÅĞ¶ÏÔËĞĞ»·¾³ÊÇ·ñÎªĞ¡¶Ë
-*/
+#include<iostream>
+#include<ctime>
+using namespace std;
 static const int endianTest = 1;
 #define IsLittleEndian() (*(char *)&endianTest == 1)
-
-/*
-* Ïò×óÑ­»·ÒÆÎ»
-*/
+#define SM3_HASH_SIZE 32 
 #define LeftRotate(word, bits) ( (word) << (bits) | (word) >> (32 - (bits)) )
-
-/*
-* ·´×ªËÄ×Ö½ÚÕûĞÍ×Ö½ÚĞò
-*/
-unsigned int* ReverseWord(unsigned int* word)
-{
-	unsigned char* byte, temp;
-
-	byte = (unsigned char*)word;
-	temp = byte[0];
-	byte[0] = byte[3];
-	byte[3] = temp;
-
-	temp = byte[1];
-	byte[1] = byte[2];
-	byte[2] = temp;
-	return word;
-}
-
-/*
-* T
-*/
-unsigned int T(int i)
-{
-	if (i >= 0 && i <= 15)
-		return 0x79CC4519;
-	else if (i >= 16 && i <= 63)
-		return 0x7A879D8A;
-	else
-		return 0;
-}
-
-/*
-* FF
-*/
+unsigned char* SM3Calc(const unsigned char* message,
+unsigned int messageLen, unsigned char digest[SM3_HASH_SIZE]);
 unsigned int FF(unsigned int X, unsigned int Y, unsigned int Z, int i)
 {
 	if (i >= 0 && i <= 15)
@@ -74,10 +18,43 @@ unsigned int FF(unsigned int X, unsigned int Y, unsigned int Z, int i)
 	else
 		return 0;
 }
+typedef struct SM3Context
+{
+	unsigned int intermediateHash[SM3_HASH_SIZE / 4];
+	unsigned char messageBlock[64];
+} SM3Context;
+unsigned int* ReverseWord(unsigned int* word)
+{
+	unsigned char* byte, temp;
 
-/*
-* GG
-*/
+	byte = (unsigned char*)word;
+	temp = byte[0];
+	byte[0] = byte[3];
+	byte[3] = temp;
+	temp = byte[1];
+	byte[1] = byte[2];
+	byte[2] = temp;
+	return word;
+}
+unsigned int T(int i)
+{
+	if (i >= 0 && i <= 15)
+		return 0x79CC4519;
+	else if (i >= 16 && i <= 63)
+		return 0x7A879D8A;
+	else
+		return 0;
+}
+unsigned int P0(unsigned int X)
+{
+	return X ^ LeftRotate(X, 9) ^ LeftRotate(X, 17);
+}
+
+unsigned int P1(unsigned int X)
+{
+	return X ^ LeftRotate(X, 15) ^ LeftRotate(X, 23);
+}
+
 unsigned int GG(unsigned int X, unsigned int Y, unsigned int Z, int i)
 {
 	if (i >= 0 && i <= 15)
@@ -88,25 +65,6 @@ unsigned int GG(unsigned int X, unsigned int Y, unsigned int Z, int i)
 		return 0;
 }
 
-/*
-* P0
-*/
-unsigned int P0(unsigned int X)
-{
-	return X ^ LeftRotate(X, 9) ^ LeftRotate(X, 17);
-}
-
-/*
-* P1
-*/
-unsigned int P1(unsigned int X)
-{
-	return X ^ LeftRotate(X, 15) ^ LeftRotate(X, 23);
-}
-
-/*
-* ³õÊ¼»¯º¯Êı
-*/
 void SM3Init(SM3Context* context)
 {
 	context->intermediateHash[0] = 0x7380166F;
@@ -120,7 +78,7 @@ void SM3Init(SM3Context* context)
 }
 
 /*
-* ´¦ÀíÏûÏ¢¿é
+* å¤„ç†æ¶ˆæ¯å—
 */
 void SM3ProcessMessageBlock(SM3Context* context)
 {
@@ -129,7 +87,7 @@ void SM3ProcessMessageBlock(SM3Context* context)
 	unsigned int W_[64];
 	unsigned int A, B, C, D, E, F, G, H, SS1, SS2, TT1, TT2;
 
-	/* ÏûÏ¢À©Õ¹ */
+	/* æ¶ˆæ¯æ‰©å±• */
 	for (i = 0; i < 16; i++)
 	{
 		W[i] = *(unsigned int*)(context->messageBlock + i * 4);
@@ -144,13 +102,16 @@ void SM3ProcessMessageBlock(SM3Context* context)
 			^ W[i - 6];
 		//printf("%d: %x\n", i, W[i]);    
 	}
-	for (i = 0; i < 64; i++)
+	for (i = 0; i < 64; i+=4)
 	{
 		W_[i] = W[i] ^ W[i + 4];
-		//printf("%d: %x\n", i, W_[i]);    
+		W_[i+1] = W[i+1] ^ W[i + 5];
+		W_[i + 2] = W[i + 2] ^ W[i + 6];
+		W_[i + 2] = W[i + 2] ^ W[i + 7];
+		//å¾ªç¯å±•å¼€  
 	}
 
-	/* ÏûÏ¢Ñ¹Ëõ */
+	/* æ¶ˆæ¯å‹ç¼© */
 	A = context->intermediateHash[0];
 	B = context->intermediateHash[1];
 	C = context->intermediateHash[2];
@@ -185,7 +146,7 @@ void SM3ProcessMessageBlock(SM3Context* context)
 }
 
 /*
-* SM3Ëã·¨Ö÷º¯Êı
+* SM3ç®—æ³•ä¸»å‡½æ•°
 */
 unsigned char* SM3Calc(const unsigned char* message,
 	unsigned int messageLen, unsigned char digest[SM3_HASH_SIZE])
@@ -193,17 +154,17 @@ unsigned char* SM3Calc(const unsigned char* message,
 	SM3Context context;
 	unsigned int i, remainder, bitLen;
 
-	/* ³õÊ¼»¯ÉÏÏÂÎÄ */
+	/* åˆå§‹åŒ–ä¸Šä¸‹æ–‡ */
 	SM3Init(&context);
 
-	/* ¶ÔÇ°ÃæµÄÏûÏ¢·Ö×é½øĞĞ´¦Àí */
+	/* å¯¹å‰é¢çš„æ¶ˆæ¯åˆ†ç»„è¿›è¡Œå¤„ç† */
 	for (i = 0; i < messageLen / 64; i++)
 	{
 		memcpy(context.messageBlock, message + i * 64, 64);
 		SM3ProcessMessageBlock(&context);
 	}
 
-	/* Ìî³äÏûÏ¢·Ö×é£¬²¢´¦Àí */
+	/* å¡«å……æ¶ˆæ¯åˆ†ç»„ï¼Œå¹¶å¤„ç† */
 	bitLen = messageLen * 8;
 	if (IsLittleEndian())
 		ReverseWord(&bitLen);
@@ -212,8 +173,8 @@ unsigned char* SM3Calc(const unsigned char* message,
 	context.messageBlock[remainder] = 0x80;
 	if (remainder <= 55)
 	{
-		/* ³¤¶È°´ÕÕ´ó¶Ë·¨Õ¼8¸ö×Ö½Ú£¬¸Ã³ÌĞòÖ»¿¼ÂÇ³¤¶ÈÔÚ 2**32 - 1£¨µ¥Î»£º±ÈÌØ£©ÒÔÄÚµÄÇé¿ö£¬
-		* ¹Ê½«¸ß 4 ¸ö×Ö½Ú¸³Îª 0 ¡£*/
+		/* é•¿åº¦æŒ‰ç…§å¤§ç«¯æ³•å 8ä¸ªå­—èŠ‚ï¼Œè¯¥ç¨‹åºåªè€ƒè™‘é•¿åº¦åœ¨ 2**32 - 1ï¼ˆå•ä½ï¼šæ¯”ç‰¹ï¼‰ä»¥å†…çš„æƒ…å†µï¼Œ
+		* æ•…å°†é«˜ 4 ä¸ªå­—èŠ‚èµ‹ä¸º 0 ã€‚*/
 		memset(context.messageBlock + remainder + 1, 0, 64 - remainder - 1 - 8 + 4);
 		memcpy(context.messageBlock + 64 - 4, &bitLen, 4);
 		SM3ProcessMessageBlock(&context);
@@ -222,32 +183,34 @@ unsigned char* SM3Calc(const unsigned char* message,
 	{
 		memset(context.messageBlock + remainder + 1, 0, 64 - remainder - 1);
 		SM3ProcessMessageBlock(&context);
-		/* ³¤¶È°´ÕÕ´ó¶Ë·¨Õ¼8¸ö×Ö½Ú£¬¸Ã³ÌĞòÖ»¿¼ÂÇ³¤¶ÈÔÚ 2**32 - 1£¨µ¥Î»£º±ÈÌØ£©ÒÔÄÚµÄÇé¿ö£¬
-		* ¹Ê½«¸ß 4 ¸ö×Ö½Ú¸³Îª 0 ¡£*/
+		/* é•¿åº¦æŒ‰ç…§å¤§ç«¯æ³•å 8ä¸ªå­—èŠ‚ï¼Œè¯¥ç¨‹åºåªè€ƒè™‘é•¿åº¦åœ¨ 2**32 - 1ï¼ˆå•ä½ï¼šæ¯”ç‰¹ï¼‰ä»¥å†…çš„æƒ…å†µï¼Œ
+		* æ•…å°†é«˜ 4 ä¸ªå­—èŠ‚èµ‹ä¸º 0 ã€‚*/
 		memset(context.messageBlock, 0, 64 - 4);
 		memcpy(context.messageBlock + 64 - 4, &bitLen, 4);
 		SM3ProcessMessageBlock(&context);
 	}
-
-	/* ·µ»Ø½á¹û */
+	/* è¿”å›ç»“æœ */
 	if (IsLittleEndian())
-		for (i = 0; i < 8; i++)
+		for (i = 0; i < 8; i+=2)
+		{
 			ReverseWord(context.intermediateHash + i);
+			ReverseWord(context.intermediateHash + i+1);
+		}
 	memcpy(digest, context.intermediateHash, SM3_HASH_SIZE);
 
 	return digest;
 }
 int main(int argc, char* argv[])
 {
+	clock_t startTime, endTime;
+	startTime = clock();//è®¡æ—¶å¼€å§‹
 	unsigned char input[256] = "sdu creating course";
 	int ilen = 3;
 	unsigned char output[32];
 	int i;
 	// ctx;
-
 	printf("Message:\n");
 	printf("%s\n", input);
-
 	SM3Calc(input, ilen, output);
 	printf("Hash:\n   ");
 	for (i = 0; i < 32; i++)
@@ -255,19 +218,13 @@ int main(int argc, char* argv[])
 		printf("%02x", output[i]);
 		if (((i + 1) % 4) == 0) printf(" ");
 	}
-
 	printf("\n");
-
-
 	unsigned char input2[256] = "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd";
 	int ilen2 = 64;
 	unsigned char output2[32];
 	int i2;
-	// ctx;
-
 	printf("Message:\n");
 	printf("%s\n", input2);
-
 	SM3Calc(input2, ilen2, output2);
 	printf("Hash:\n   ");
 	for (i2 = 0; i2 < 32; i2++)
@@ -276,4 +233,7 @@ int main(int argc, char* argv[])
 		if (((i2 + 1) % 4) == 0) printf(" ");
 	}
 	printf("\n");
+	endTime = clock();//è®¡æ—¶ç»“æŸ
+	cout << "The run time is: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << "s" << endl;
+	system("pause");
 }
