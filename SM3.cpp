@@ -102,13 +102,9 @@ void SM3ProcessMessageBlock(SM3Context* context)
 			^ W[i - 6];
 		//printf("%d: %x\n", i, W[i]);    
 	}
-	for (i = 0; i < 64; i+=4)
+	for (i = 0; i < 64; i++)
 	{
 		W_[i] = W[i] ^ W[i + 4];
-		W_[i+1] = W[i+1] ^ W[i + 5];
-		W_[i + 2] = W[i + 2] ^ W[i + 6];
-		W_[i + 2] = W[i + 2] ^ W[i + 7];
-		//循环展开  
 	}
 
 	/* 消息压缩 */
@@ -191,10 +187,9 @@ unsigned char* SM3Calc(const unsigned char* message,
 	}
 	/* 返回结果 */
 	if (IsLittleEndian())
-		for (i = 0; i < 8; i+=2)
+		for (i = 0; i < 8; i++)
 		{
 			ReverseWord(context.intermediateHash + i);
-			ReverseWord(context.intermediateHash + i+1);
 		}
 	memcpy(digest, context.intermediateHash, SM3_HASH_SIZE);
 
